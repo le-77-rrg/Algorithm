@@ -1,0 +1,41 @@
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        vector<vector<int>>adj(numCourses);
+        vector<int>indegree(numCourses,0);
+        
+        for(vector<vector<int>>::iterator it=prerequisites.begin();it!=prerequisites.end();it++){
+            int nowcus=(*it)[0];
+            int precus=(*it)[1];
+            adj[precus].push_back(nowcus);
+            indegree[nowcus]+=1;
+        }
+
+        queue<int>q;
+        for(int i=0;i<numCourses;i++){
+            if(indegree[i]==0){
+                q.push(i);
+            }
+        }
+
+        vector<int>out;
+        int cnt=0;
+        while(!q.empty()){
+            int u=q.front();
+            out.push_back(u);
+            q.pop();
+            cnt+=1;
+            for(int i=0;i<adj[u].size();i++){
+                int v=adj[u][i];
+                if(--indegree[v]==0){
+                    q.push(v);
+                }
+            }
+        }
+        if(cnt==numCourses)return out;
+        else {
+            out.clear();
+            return out;
+        }
+    }
+};
