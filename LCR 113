@@ -1,0 +1,38 @@
+class Solution {
+public:
+    vector<bool> checkIfPrerequisite(int numCourses, vector<vector<int>>& prerequisites, vector<vector<int>>& queries) {
+        vector<bool>out;
+        vector<vector<int>>adj(numCourses);     
+        //1.构建邻接表  
+        for(vector<vector<int>>::iterator it=prerequisites.begin();it!=prerequisites.end();it++){
+            int nowcus=(*it)[0];
+            int precus=(*it)[1];
+            adj[precus].push_back(nowcus);
+        }
+        // 2. 预处理所有课程的可达性（Floyd-Warshall算法）
+        vector<vector<bool>> reachable(numCourses, vector<bool>(numCourses, false));
+        for (int i = 0; i < numCourses; i++) {
+            queue<int> q;
+            q.push(i);
+            reachable[i][i] = true; // 自身可达
+            while (!q.empty()) {
+                int u = q.front();
+                q.pop();
+                for (int v : adj[u]) {
+                    if (!reachable[i][v]) {
+                        reachable[i][v] = true;
+                        q.push(v);
+                    }
+                }
+            }
+        }
+        //3.处理数据
+        for(vector<vector<int>>::iterator it=queries.begin();it!=queries.end();it++){
+            int nowcus=(*it)[0];
+            int precus=(*it)[1];
+            if(reachable[precus][nowcus])out.push_back(true);
+            else out.push_back(false);
+        }
+        return out;
+    }
+};
