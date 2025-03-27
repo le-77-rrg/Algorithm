@@ -1,0 +1,87 @@
+#include<iostream>
+using namespace std;
+#include<vector>
+#include<algorithm>  // 引入max_element
+
+vector<int> solution(int numCourses, vector<vector<int> >& prerequisites) {
+    vector<int> indegree(numCourses, 0);
+    vector<vector<int> > adj(numCourses);
+    vector<int> result;
+
+    // 1. 反向构建邻接表
+    for (auto& edge : prerequisites) {
+        int u = edge[0], v = edge[1];
+        if(u==v){continue;}
+        adj[v].push_back(u);
+        indegree[u]++;
+    }
+
+
+    // 2. 拓扑排序：按要求选择最大的节点
+    vector<bool> visited(numCourses, false);// 用来记录哪些节点已经被加入到结果中了
+        while(result.size()!=numCourses){
+            vector<int> candidates;
+        // 找到入度为0且没有被访问过的节点
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0 && !visited[i]) {
+                candidates.push_back(i);
+            }
+        }
+
+        // 如果没有可选的节点，说明存在环
+        if (candidates.empty()) {
+            result.clear();
+            return result; // 无解
+        }
+
+        // 确保选出的是最大的节点
+        int next_node = *max_element(candidates.begin(), candidates.end());
+        result.push_back(next_node);
+        visited[next_node] = true;
+        // 更新入度
+        for (int v : adj[next_node]) {
+            indegree[v]--;
+        }
+}
+
+
+    return result;
+}
+
+int main() {
+    int t;  // 数据组数
+    cin >> t;
+    vector<vector<int> >all_result(t);
+    for (int j=0;j<t;j++) {
+        int numofnode, numofedge;
+        cin >> numofnode >> numofedge;
+
+        vector<vector<int> > prerequisites(numofedge);
+        for (int i = 0; i < numofedge; i++) {
+            int u, v;
+            cin >> u >> v;
+            prerequisites[i].push_back(u - 1);  // 转换为0-index
+            prerequisites[i].push_back(v - 1);
+        }
+
+        vector<int> result = solution(numofnode, prerequisites);
+        for(int i=0;i<result.size();i++){
+        all_result[j].push_back(result[i]);
+    }
+
+    }
+
+    for(int j=0;j<t;j++){
+
+        if (all_result[j].empty()) {
+            cout << "Impossible!" << endl;  // 无解
+        }
+        else {
+            for (int i = all_result[j].size()-1; i >= 0; i--) {
+                cout << all_result[j][i] + 1 << " ";  // 输出时加1
+            }
+            cout << endl;
+        }
+    }
+    return 0;
+}
