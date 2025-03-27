@@ -33,8 +33,7 @@ bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
                 q.push(v);
             }
         }
-    }
-    
+    }    
     return count == numCourses;
 }
 };
