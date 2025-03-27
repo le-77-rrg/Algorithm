@@ -1,7 +1,6 @@
 class Solution {
 public:
 
-
 bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
     vector<vector<int>> adj(numCourses);       // 邻接表
     vector<int> indegree(numCourses, 0);       // 入度数组
