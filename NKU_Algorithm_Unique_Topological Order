@@ -44,7 +44,6 @@ vector<int> solution(int numCourses, vector<vector<int> >& prerequisites) {
         }
 }
 
-
     return result;
 }
 
