@@ -1,1 +1,48 @@
+//🤨
+class Solution {
+public:
+    vector<int> findMinHeightTrees(int n, vector<vector<int>>& edges) {
+        if (n == 1) return {0}; // 处理 n=1 的特殊情况
 
+        vector<vector<int>> adj(n);
+        vector<int> degree(n, 0);
+        // 构建邻接表和度数
+        for (auto& e : edges) {
+            int u = e[0], v = e[1];
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+            degree[u]++;
+            degree[v]++;
+        }
+
+        queue<int> q;
+        // 初始化：将所有叶子节点（度=1）入队
+        for (int i = 0; i < n; i++) {
+            if (degree[i] == 1) q.push(i);
+        }
+
+        int remaining = n;
+        while (remaining > 2) {
+            int size = q.size();
+            remaining -= size;
+            // 剥离当前层的所有叶子节点
+            for (int i = 0; i < size; i++) {
+                int leaf = q.front(); q.pop();
+                // 更新相邻节点的度数
+                for (int neighbor : adj[leaf]) {
+                    if (--degree[neighbor] == 1) {
+                        q.push(neighbor);
+                    }
+                }
+            }
+        }
+
+        // 剩余节点即为答案
+        vector<int> res;
+        while (!q.empty()) {
+            res.push_back(q.front());
+            q.pop();
+        }
+        return res;
+    }
+};
