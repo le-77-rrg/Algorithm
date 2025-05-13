@@ -1,0 +1,24 @@
+class Solution {
+private:
+    int rob(vector<int>& nums){
+        int n=nums.size();
+        if(n==1)return nums[0];
+        vector<int>result(n+1);
+        result[0]=nums[0];result[1]=max(nums[0],nums[1]);
+        for(int i=2;i<n;i++){
+            result[i]=max(result[i-2]+nums[i],result[i-1]);
+        }
+        return result[n-1];
+    }
+
+public:
+    int deleteAndEarn(vector<int>& nums) {
+        int max_num=*(max_element(nums.begin(),nums.end()));
+        vector<int> sum(max_num+1,0);
+        for(int num : nums){
+            sum[num]+=num;
+        }
+        //选择某元素 其相邻位置不能被选择 跟198.一样
+        return rob(sum);
+    }
+};
