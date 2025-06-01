@@ -1,0 +1,130 @@
+//🥸
+#include <iostream>
+#include <vector>
+#include <cstring>//包含memset函数
+using namespace std;
+
+const int N = 201; // 最大节点数
+int n, m;
+vector<int> G[N]; 
+int cap[2*N][2*N]; 
+int flow[2*N][2*N]; 
+int s, t; 
+bool left_used[N]; 
+bool right_used[N]; //用于最后找到路径
+bool visited[2*N];
+int pre[2*N];
+
+bool dfs(int u) {// 深度优先搜索用于寻找增广路径
+    if (u == t) return true;
+    visited[u] = true;  
+    for (int v = 0; v < 2*n+2; v++) {
+        if (!visited[v] && (cap[u][v] > flow[u][v])) {
+            pre[v] = u;
+            if (dfs(v)) return true;
+        }
+    }
+    return false;
+}
+
+int maxFlow() {// Ford-Fulkerson算法求最大流
+    int maxflow = 0;
+    while (true) {
+        memset(visited, 0, sizeof(visited));//记得清空visited数组
+        memset(pre, -1, sizeof(pre));
+        if (!dfs(s)) break;
+        
+        int f = 999999;
+        for (int i = t; i != s; i = pre[i]) { //找到最小剩余容量f
+            int u = pre[i];
+            f = min(f, cap[u][i] - flow[u][i]);
+        }        
+        for (int i = t; i != s; i = pre[i]) { // 更新流量
+            int u = pre[i];
+            flow[u][i] += f; //已用的流量
+            flow[i][u] -= f; //用于修正 可能会使用流量（反向边）
+        } 
+        maxflow += f;
+    }
+    return maxflow;
+}
+
+void mark_matching() {// 标记匹配关系
+    memset(left_used, 0, sizeof(left_used));
+    memset(right_used, 0, sizeof(right_used));
+    for (int i = 1; i <= n; i++) { // 左侧点
+        for (int j = 1; j <= n; j++) { // 右侧点
+            if (flow[i][n+j] > 0) { // 如果有流量，表示匹配
+                left_used[i-1] = true;
+                right_used[j-1] = true;
+                break;
+            }
+        }
+    }
+}
+
+void findPath(int u, vector<bool>& visited, vector<int>& path) {// 找到路径DFS
+    path.push_back(u + 1); // 1-indexed
+    visited[u] = true;
+    for (int v : G[u]) {
+        if (!visited[v] && flow[u+1][v+n+1] > 0) { // 检查是否有流量
+            findPath(v, visited, path);
+            break;
+        }
+    }
+}
+
+int main() {
+    cin >> n >> m;
+    
+// 1.初始化
+    s = 0;
+    t = 2*n+1;
+    memset(cap, 0, sizeof(cap));
+    memset(flow, 0, sizeof(flow));
+    
+// 2.构建网络流图
+    for (int i = 1; i <= n; i++) {// 源点到左侧节点，容量为1
+        cap[s][i] = 1;
+    } 
+    for (int i = 1; i <= n; i++) {// 右侧节点到汇点，容量为1
+        cap[n+i][t] = 1;// 右侧节点编号为n+i
+    }
+    // 读取原图的边，从左侧到右侧节点，容量为1
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        cin >> u >> v;
+        --u; --v; // 0-indexed
+        G[u].push_back(v);
+        cap[u+1][v+n+1] = 1; // 右侧节点编号为n+i
+    }
+    
+// 3.求最大流
+    int maxf = maxFlow();  
+    int min_k = n - maxf;    // 最小路径覆盖数 = 节点数 - 最大流
+    
+    cout << min_k << endl;
+// 4.获得路径
+    mark_matching();
+    vector<bool> visited(n, false);
+    for (int i = 0; i < n; i++) {
+        if (!right_used[i] && !visited[i]) { // 右侧没被匹配进来的点是路径开头
+            vector<int> path;
+            findPath(i, visited, path);
+            if (!path.empty()) {
+                cout << path.size();
+                for (int x : path) cout << " " << x;
+                cout << endl;
+            }
+        }
+    }
+    
+    // 检查是否有孤立的点
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            cout << 1<<" "<< (i + 1) << endl;
+        }
+    }
+    
+    return 0;
+}
